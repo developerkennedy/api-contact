@@ -12,6 +12,7 @@ const envSchema = z.object({
     CORS_ORIGIN: z.string().default('*'),
     TRUST_PROXY: z.string().default('false'),
     LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
+    JWT_REFRESH_EXPIRY_DAYS: z.coerce.number().int().positive().default(7),
 });
 
 export const env = envSchema.parse(process.env);

@@ -11,7 +11,7 @@ export type IPayload = z.infer<typeof payloadSchema>;
 export function signToken(payload: IPayload) {
     const token = jwt.sign(payload, env.JWT_SECRET, {
         algorithm: 'HS256',
-        expiresIn: '1h',
+        expiresIn: '15m',
         issuer: env.JWT_ISSUER,
         audience: env.JWT_AUDIENCE,
         subject: payload.id,

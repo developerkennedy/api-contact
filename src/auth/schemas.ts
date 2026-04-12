@@ -16,3 +16,11 @@ export const loginSchema = z.object({
     email: z.email().max(255),
     password: z.string().min(8).max(128),
 });
+
+export const refreshSchema = z.object({
+    refresh_token: z.string().uuid('Invalid refresh token format'),
+});
+
+export const logoutSchema = z.object({
+    refresh_token: z.string().uuid('Invalid refresh token format'),
+});

@@ -5,7 +5,9 @@ import { AppError } from '../../src/shared/errors/AppError';
 import { comparePassword, hash } from '../../src/shared/utils/hash';
 import { verifyToken } from '../../src/auth/jwt';
 import { IUserRepository } from '../../src/repositories/user/interfaces/IUserRepository';
+import { IRefreshTokenRepository } from '../../src/repositories/refresh-token/interfaces/IRefreshTokenRepository';
 import { UserDTO } from '../../src/domain/user.entity';
+import { RefreshTokenDTO } from '../../src/domain/refresh-token.entity';
 
 function makeUserRepository(overrides: Partial<IUserRepository> = {}): IUserRepository {
     return {
@@ -14,6 +16,37 @@ function makeUserRepository(overrides: Partial<IUserRepository> = {}): IUserRepo
         },
         async findByEmail() {
             return null;
+        },
+        ...overrides,
+    };
+}
+
+function makeRefreshTokenRepository(
+    overrides: Partial<IRefreshTokenRepository> = {}
+): IRefreshTokenRepository {
+    return {
+        async create(data) {
+            return {
+                id: 'rt-11111111-1111-1111-1111-111111111111',
+                is_rotated: false,
+                created_at: new Date(),
+                ...data,
+            } as RefreshTokenDTO;
+        },
+        async findByHash() {
+            return null;
+        },
+        async deleteById() {},
+        async deleteByFamilyId() {},
+        async deleteByUserId() {},
+        async deleteExpired() {},
+        async rotate(_oldId, newToken) {
+            return {
+                id: 'rt-22222222-2222-2222-2222-222222222222',
+                is_rotated: false,
+                created_at: new Date(),
+                ...newToken,
+            } as RefreshTokenDTO;
         },
         ...overrides,
     };
@@ -84,9 +117,10 @@ describe('Register', () => {
 });
 
 describe('Login', () => {
-    it('normalizes email and returns a verifiable token', async () => {
+    it('normalizes email and returns access_token and refresh_token', async () => {
         const hashedPassword = await hash('StrongPass1!');
         let lookedUpEmail: string | null = null;
+        let createdRefreshToken = false;
 
         const repository = makeUserRepository({
             async findByEmail(email) {
@@ -100,17 +134,32 @@ describe('Login', () => {
             },
         });
 
-        const useCase = new Login(repository);
+        const refreshTokenRepo = makeRefreshTokenRepository({
+            async create(data) {
+                createdRefreshToken = true;
+                return {
+                    id: 'rt-11111111-1111-1111-1111-111111111111',
+                    is_rotated: false,
+                    created_at: new Date(),
+                    ...data,
+                } as RefreshTokenDTO;
+            },
+        });
+
+        const useCase = new Login(repository, refreshTokenRepo);
         const result = await useCase.execute('  Bob@Example.COM ', 'StrongPass1!');
-        const payload = verifyToken(result.token);
+        const payload = verifyToken(result.access_token);
 
         expect(lookedUpEmail).toBe('bob@example.com');
         expect(payload.id).toBe('22222222-2222-4222-8222-222222222222');
+        expect(result.refresh_token).toBeTruthy();
+        expect(createdRefreshToken).toBe(true);
     });
 
     it('rejects invalid credentials', async () => {
         const repository = makeUserRepository();
-        const useCase = new Login(repository);
+        const refreshTokenRepo = makeRefreshTokenRepository();
+        const useCase = new Login(repository, refreshTokenRepo);
 
         try {
             await useCase.execute('nobody@example.com', 'wrong-password');

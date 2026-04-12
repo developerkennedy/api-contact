@@ -1,4 +1,5 @@
 import {
+    boolean,
     index,
     pgTable,
     timestamp,
@@ -69,6 +70,26 @@ export const categoriesTable = pgTable(
     ]
 );
 
+export const refreshTokensTable = pgTable(
+    'refresh_tokens',
+    {
+        id: uuid().primaryKey().defaultRandom(),
+        token_hash: varchar({ length: 64 }).notNull(),
+        user_id: uuid()
+            .notNull()
+            .references(() => usersTable.id, { onDelete: 'cascade' }),
+        family_id: uuid().notNull(),
+        is_rotated: boolean().notNull().default(false),
+        created_at: timestamp().defaultNow().notNull(),
+        expires_at: timestamp().notNull(),
+    },
+    (t) => [
+        uniqueIndex('refresh_tokens_token_hash_unique').on(t.token_hash),
+        index('refresh_tokens_user_id_idx').on(t.user_id),
+        index('refresh_tokens_family_id_idx').on(t.family_id),
+    ]
+);
+
 export const contactsCategoriesTable = pgTable(
     'contacts_categories',
     {
@@ -88,6 +109,14 @@ export const contactsCategoriesTable = pgTable(
 // Relations
 export const usersRelations = relations(usersTable, ({ many }) => ({
     contacts: many(contactsTable),
+    refreshTokens: many(refreshTokensTable),
+}));
+
+export const refreshTokensRelations = relations(refreshTokensTable, ({ one }) => ({
+    user: one(usersTable, {
+        fields: [refreshTokensTable.user_id],
+        references: [usersTable.id],
+    }),
 }));
 
 export const contactsRelations = relations(contactsTable, ({ one, many }) => ({
