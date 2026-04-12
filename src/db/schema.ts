@@ -1,2 +1,1 @@
-export * from "../domain/contact.schema";
-
+export * from '../domain/contact.schema';

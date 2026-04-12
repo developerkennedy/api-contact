@@ -1,100 +1,165 @@
-# API Contact — Guia do Projeto
-
-## Instrução para o assistente
-
-Sempre que um novo passo for concluído, atualize a seção **Progresso** deste arquivo marcando o passo como feito e adicionando novos passos descobertos durante o desenvolvimento.
-
----
+# API Contact — Estado Atual
 
 ## Stack
 
-- **Runtime:** Node.js + TypeScript
-- **Framework:** Express
-- **ORM:** Drizzle ORM
-- **Driver:** postgres.js
-- **Banco (dev):** PostgreSQL via Docker
-- **Validação:** Zod
-- **Auth:** JWT
-- **Env:** dotenv
+- Runtime: Node.js + TypeScript
+- Framework: Express 5
+- Banco: PostgreSQL
+- ORM: Drizzle ORM + postgres.js
+- Validação: Zod
+- Auth: JWT
+- Logs: Pino
 
----
+## Estrutura
 
-## Arquitetura
-
-```
+```text
 src/
-├── http/
-│   ├── routes/contact.routes.ts
-│   ├── middlewares/error-handler.ts
-│   └── server.ts
+├── @types/express.d.ts
 ├── auth/
 │   ├── jwt.ts
 │   ├── middleware.ts
 │   └── schemas.ts
-├── controllers/
-│   └── contact.controller.ts
-├── use-cases/
-│   ├── create-contact.ts
-│   ├── get-contact.ts
-│   ├── list-contacts.ts
-│   └── delete-contact.ts
-├── repositories/
-│   ├── interfaces/IContactRepository.ts
-│   └── contact.repository.ts
-├── domain/
-│   ├── contact.entity.ts
-│   └── contact.schema.ts
-├── shared/
-│   ├── errors/AppError.ts
-│   ├── types/pagination.ts
-│   └── utils/hash.ts
 ├── config/
-│   ├── env.ts
+│   ├── app.ts
 │   ├── db.ts
-│   └── app.ts
-└── db/
-    ├── migrations/
-    ├── schema.ts
-    └── seed.ts
+│   └── env.ts
+├── controllers/
+│   ├── auth/
+│   ├── category/
+│   └── contact/
+├── db/
+│   ├── migrations/
+│   ├── schema.ts
+│   └── seed.ts
+├── domain/
+│   ├── category.entity.ts
+│   ├── contact.entity.ts
+│   ├── contact.schema.ts
+│   └── user.entity.ts
+├── factories/
+│   ├── auth.factory.ts
+│   ├── category.factory.ts
+│   └── contact.factory.ts
+├── http/
+│   ├── middlewares/
+│   ├── routes/
+│   └── server.ts
+├── repositories/
+│   ├── categories/
+│   ├── contact/
+│   └── user/
+├── shared/
+│   ├── errors/
+│   ├── logger/
+│   ├── types/
+│   └── utils/
+└── use-cases/
+    ├── auth/
+    ├── category/
+    └── contact/
 ```
 
----
+## Rotas
 
-## Progresso
+### Health
 
-### Configuração inicial
+- `GET /health`
 
-- [x] Estrutura de pastas e arquivos vazios criada
-- [x] Dependências instaladas (`express`, `dotenv`, `zod`, `drizzle-orm`, `postgres`, `drizzle-kit`)
-- [x] TypeScript configurado (`tsconfig.json`)
-- [x] Scripts no `package.json` (`dev`, `build`, `start`, `db:generate`, `db:migrate`, `db:studio`)
+### Auth
 
-### Config
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
 
-- [x] `src/config/env.ts` — parse das variáveis de ambiente com Zod + `z.coerce.number()` para PORT
-- [x] `src/config/app.ts` — criação do Express, middlewares globais (`json`, `urlencoded`)
-- [x] `src/config/db.ts` — instância do Drizzle com postgres.js
-- [x] `src/http/server.ts` — `app.listen` usando `env.PORT`
+### Contacts
 
-### Schema e banco
+- `POST /api/v1/contacts`
+- `GET /api/v1/contacts`
+- `GET /api/v1/contacts/:id`
+- `PATCH /api/v1/contacts/:id`
+- `DELETE /api/v1/contacts/:id`
 
-- [x] `src/domain/contact.schema.ts` — tabelas `users`, `contacts`, `categories`, `contacts_categories` (pivot)
-- [x] Relacionamentos definidos: `users` → `contacts` (one-to-many), `contacts` ↔ `categories` (many-to-many)
-- [x] Foreign keys com `onDelete: cascade`
-- [x] `relations()` definidas para todas as tabelas
-- [x] `src/db/schema.ts` — re-exporta tudo para o drizzle-kit
-- [x] `drizzle.config.ts` — configuração do drizzle-kit (dialect, schema, out, dbCredentials)
+### Categories
 
-### Próximos passos
+- `POST /api/v1/categories`
+- `GET /api/v1/categories`
+- `GET /api/v1/categories/:id`
+- `PATCH /api/v1/categories/:id`
+- `DELETE /api/v1/categories/:id`
 
-- [x] Criar `.env` com `PORT`, `DATABASE_URL`, `JWT_SECRET`
-- [x] Subir PostgreSQL com Docker
-- [x] Gerar migrations (`npm run db:generate`)
-- [x] Rodar migrations (`npm run db:migrate`)
-- [x] `src/shared/errors/AppError.ts` — erro de domínio com statusCode
-- [x] `src/http/middlewares/error-handler.ts` — middleware global de erros
-- [x] `src/auth/` — JWT sign/verify, middleware de autenticação, schemas Zod
-- [x] `src/repositories/` — interface e implementação com Drizzle
-- [ ] `src/use-cases/` — regras de negócio
-- [ ] `src/controllers/` — leitura de req e resposta
-- [ ] `src/http/routes/contact.routes.ts` — registro das rotas
+## Decisões Importantes
+
+- Multi-tenant por `user_id` em contatos e categorias
+- Soft delete em `users`, `contacts` e `categories`
+- Índices únicos parciais para ignorar registros com `deleted_at`
+- Índice em `category_id` na junction table `contacts_categories`
+- Criação e atualização de contatos com categorias em transação
+- Atualização de categorias em contatos usa diff (add/remove) ao invés de delete-all/re-insert
+- Remoção de categoria limpa a tabela pivot `contacts_categories`
+- Categorias deletadas não aparecem mais nas respostas de contatos
+- JWT com `issuer`, `audience`, `subject` e algoritmo explícito
+- Validação explícita do scheme `Bearer` no middleware de auth
+- CORS wildcard bloqueado em produção (lança erro ao invés de apenas logar warning)
+- Rate limiting por user ID (200/15min) em rotas autenticadas, além do global por IP (500/15min)
+- Request ID sempre gerado server-side (não aceita header do cliente)
+- Erros de validação Zod não expõem `formErrors` ao cliente
+- Erros de constraint do Postgres não expõem nomes de constraint ao cliente
+- Pool de conexões do Postgres configurado explicitamente (max 10, idle 30s, connect 10s)
+- Controllers usam guard `if (!req.user)` ao invés de non-null assertion
+- Shutdown gracioso encerra HTTP server e conexões do Postgres
+
+## Variáveis de Ambiente
+
+- `PORT`
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `JWT_ISSUER`
+- `JWT_AUDIENCE`
+- `NODE_ENV`
+- `CORS_ORIGIN`
+- `TRUST_PROXY`
+- `LOG_LEVEL`
+
+## Comandos
+
+- `npm run dev`
+- `npm run build`
+- `npm run lint`
+- `npm test` — Vitest (unit tests)
+- `npm run test:coverage` — Vitest com cobertura (v8)
+- `npm run test:legacy` — runner antigo em CJS (mantido por compatibilidade)
+- `npm run db:generate`
+- `npm run db:migrate`
+
+## Qualidade Atual
+
+- Build passando
+- Lint passando
+- Testes automatizados passando
+
+## Testes Automatizados
+
+Framework: Vitest (config em `vitest.config.ts`, setup em `tests/setup.ts`)
+
+A suíte atual cobre (34 testes):
+
+- **auth use-cases**: register (normalização, hash, duplicata) e login (token, credenciais inválidas)
+- **contact use-cases**: create, update, delete, get, list e validações de schema
+- **category use-cases**: create, update, delete, get, list e validações de schema
+- **middlewares**: authenticate (sem header, scheme errado, token inválido, token válido) e errorHandler (AppError, ZodError, erro genérico)
+
+Testes unitários usam mocks de repositórios tipados pelas interfaces.
+
+## CI/CD
+
+- GitHub Actions (`.github/workflows/ci.yml`) com 4 jobs paralelos: lint, build, security, test
+- Job `test` roda com Postgres 16 e publica relatório de coverage como artefato
+- Job `security` roda `npm audit --audit-level=high`
+- Docker Compose de teste (`docker-compose.test.yml`) na porta 5433 com tmpfs
+
+## Pendências Recomendadas
+
+- Adicionar testes de integração HTTP (supertest)
+- Cobrir repositórios com banco de teste
+- Implementar `src/db/seed.ts`
+- Criar documentação externa de uso da API (OpenAPI/Swagger)
+- Implementar refresh token + logout

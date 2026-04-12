@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { Login } from "../../use-cases/auth/login";
-import { loginSchema } from "../../auth/schemas";
+import { Request, Response } from 'express';
+import { Login } from '../../use-cases/auth/login';
+import { loginSchema } from '../../auth/schemas';
 
 export class LoginController {
     constructor(private readonly useCase: Login) {}

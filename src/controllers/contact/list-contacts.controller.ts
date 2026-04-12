@@ -1,15 +1,17 @@
-import { Request, Response } from "express";
-import { ListContacts } from "../../use-cases/contact/list-contacts";
+import { Request, Response } from 'express';
+import { ListContacts } from '../../use-cases/contact/list-contacts';
+import { parsePagination } from '../../shared/utils/parse-pagination';
 
 export class ListContactsController {
     constructor(private readonly useCase: ListContacts) {}
 
     async handle(req: Request, res: Response) {
-        const user_id = req.user!.id;
-        const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
-        const offset = Math.max(Number(req.query.offset) || 0, 0);
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 
-        const result = await this.useCase.execute(user_id, { limit, offset });
+        const user_id = req.user.id;
+        const pagination = parsePagination(req.query);
+
+        const result = await this.useCase.execute(user_id, pagination);
 
         return res.status(200).json(result);
     }

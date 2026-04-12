@@ -1,4 +1,4 @@
-import { CreateUserDTO, UserDTO } from "../../../domain/user.entity";
+import { CreateUserDTO, UserDTO } from '../../../domain/user.entity';
 
 export interface IUserRepository {
     create(data: CreateUserDTO): Promise<UserDTO>;

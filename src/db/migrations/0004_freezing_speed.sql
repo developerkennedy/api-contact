@@ -1,0 +1,1 @@
+CREATE INDEX "contacts_categories_category_id_idx" ON "contacts_categories" USING btree ("category_id");

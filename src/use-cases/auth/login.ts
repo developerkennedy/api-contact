@@ -1,7 +1,9 @@
-import { IUserRepository } from "../../repositories/user/interfaces/IUserRepository";
-import { AppError } from "../../shared/errors/AppError";
-import { comparePassword } from "../../shared/utils/hash";
-import { signToken } from "../../auth/jwt";
+import { IUserRepository } from '../../repositories/user/interfaces/IUserRepository';
+import { AppError } from '../../shared/errors/AppError';
+import { comparePassword } from '../../shared/utils/hash';
+import { signToken } from '../../auth/jwt';
+
+const DUMMY_HASH = '$2a$12$000000000000000000000uGBOBKFmlOTfMCaqGFS1RhSLgIVGeLy';
 
 export class Login {
     constructor(private readonly repository: IUserRepository) {}
@@ -10,16 +12,15 @@ export class Login {
         const normalizedEmail = email.trim().toLowerCase();
 
         const user = await this.repository.findByEmail(normalizedEmail);
-        if (!user) {
+
+        const hashToCompare = user ? user.password : DUMMY_HASH;
+        const valid = await comparePassword(password, hashToCompare);
+
+        if (!user || !valid) {
             throw new AppError('Invalid credentials', 401);
         }
 
-        const valid = await comparePassword(password, user.password);
-        if (!valid) {
-            throw new AppError('Invalid credentials', 401);
-        }
-
-        const token = signToken({ id: user.id, email: user.email });
+        const token = signToken({ id: user.id });
         return { token };
     }
 }

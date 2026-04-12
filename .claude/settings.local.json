@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep -n \"parse\\\\|validate\" /c/Users/kenne/Documents/Playground/api-contact/src/**/*.ts)",
+      "Bash(find:*)",
+      "Bash(grep -A 5 \"handle\\(req\" /c/Users/kenne/Documents/Playground/api-contact/src/controllers/*.ts)",
+      "Bash(git:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)"
+    ]
+  }
+}

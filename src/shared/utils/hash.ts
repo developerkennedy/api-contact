@@ -1,9 +1,9 @@
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
 
-export function hash(password:string):Promise<string>{
+export function hash(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
 }
 
-export function comparePassword(password:string, hash:string):Promise<boolean>{
+export function comparePassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
 }

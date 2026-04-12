@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { DeleteContact } from "../../use-cases/contact/delete-contact";
-import { z } from "zod";
+import { Request, Response } from 'express';
+import { DeleteContact } from '../../use-cases/contact/delete-contact';
+import { z } from 'zod';
 
 const paramsSchema = z.object({ id: z.uuid() });
 
@@ -8,8 +8,10 @@ export class DeleteContactController {
     constructor(private readonly useCase: DeleteContact) {}
 
     async handle(req: Request, res: Response) {
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+
         const { id } = paramsSchema.parse(req.params);
-        const user_id = req.user!.id;
+        const user_id = req.user.id;
 
         await this.useCase.execute(id, user_id);
 

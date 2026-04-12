@@ -1,13 +1,18 @@
-import {z} from "zod";
+import { z } from 'zod';
 
 export const registerSchema = z.object({
-    name: z.string().min(3),
-    email: z.email(),
-    password: z.string().min(6),
-})
-
+    name: z.string().trim().min(3).max(100),
+    email: z.email().max(255),
+    password: z
+        .string()
+        .min(8, 'Senha deve ter ao menos 8 caracteres')
+        .max(128)
+        .regex(/[A-Z]/, 'Senha deve conter ao menos uma letra maiúscula')
+        .regex(/[0-9]/, 'Senha deve conter ao menos um número')
+        .regex(/[^A-Za-z0-9]/, 'Senha deve conter ao menos um caractere especial'),
+});
 
 export const loginSchema = z.object({
-    email: z.email(),
-    password: z.string().min(6),
-})
+    email: z.email().max(255),
+    password: z.string().min(8).max(128),
+});

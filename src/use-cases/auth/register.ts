@@ -1,7 +1,7 @@
-import { IUserRepository } from "../../repositories/user/interfaces/IUserRepository";
-import { CreateUserDTO, UserResponseDTO } from "../../domain/user.entity";
-import { AppError } from "../../shared/errors/AppError";
-import { hash } from "../../shared/utils/hash";
+import { IUserRepository } from '../../repositories/user/interfaces/IUserRepository';
+import { CreateUserDTO, UserResponseDTO } from '../../domain/user.entity';
+import { AppError } from '../../shared/errors/AppError';
+import { hash } from '../../shared/utils/hash';
 
 export class Register {
     constructor(private readonly repository: IUserRepository) {}
@@ -17,7 +17,7 @@ export class Register {
         const password = await hash(data.password);
         const user = await this.repository.create({ ...data, email, password });
 
-        const { password: _, ...response } = user;
+        const { password: _password, ...response } = user;
         return response;
     }
 }

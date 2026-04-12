@@ -8,6 +8,34 @@
       "when": 1775685209099,
       "tag": "0000_known_mattie_franklin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775777790052,
+      "tag": "0001_rainy_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775867328108,
+      "tag": "0002_real_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776003282174,
+      "tag": "0003_tough_obadiah_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776006503900,
+      "tag": "0004_freezing_speed",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,6 @@ export default defineConfig({
     schema: './src/db/schema.ts',
     out: './src/db/migrations',
     dbCredentials: {
-        url: env.DATABASE_URL!,
+        url: env.DATABASE_URL,
     }
 })

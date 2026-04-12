@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { Register } from "../../use-cases/auth/register";
-import { registerSchema } from "../../auth/schemas";
+import { Request, Response } from 'express';
+import { Register } from '../../use-cases/auth/register';
+import { registerSchema } from '../../auth/schemas';
 
 export class RegisterController {
     constructor(private readonly useCase: Register) {}

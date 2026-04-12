@@ -1,0 +1,13 @@
+function bootstrapEnv() {
+    process.env.PORT ??= '3000';
+    process.env.DATABASE_URL ??= 'postgresql://root:root@localhost:5432/api_contact';
+    process.env.JWT_SECRET ??= '12345678901234567890123456789012';
+    process.env.JWT_ISSUER ??= 'api-contact-tests';
+    process.env.JWT_AUDIENCE ??= 'api-contact-tests-clients';
+    process.env.NODE_ENV ??= 'test';
+    process.env.CORS_ORIGIN ??= 'http://localhost:3000';
+    process.env.TRUST_PROXY ??= 'false';
+    process.env.LOG_LEVEL ??= 'error';
+}
+
+module.exports = { bootstrapEnv };
