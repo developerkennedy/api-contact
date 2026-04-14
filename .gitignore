@@ -12,7 +12,7 @@ out/
 .svelte-kit/
 
 # Environment variables
-.env
+.env*
 .env.local
 .env.*.local
 .env.development
@@ -68,3 +68,9 @@ desktop.ini
 # Uploads / generated files
 uploads/
 public/uploads/
+
+# Claude Code (local settings)
+.claude/
+
+# Dev artifacts
+prompt-template.md
